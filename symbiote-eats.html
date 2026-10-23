@@ -262,7 +262,7 @@
     </div>
     <div class="cta">
       <div class="btn-wrap" id="wrap">
-        <button class="btn" id="cta" type="button">let's collaborate</button>
+        <button class="btn" id="cta" type="button">come closer</button>
       </div>
     </div>
   </main>
@@ -347,6 +347,7 @@
     gatherMs: 650,       // a coated piece pulling itself into a round drop
     ungatherMs: 460,     // a spat-out drop spreading back into its piece
   };
+  const LABELS = { page: 'come closer', eaten: 'give it back' };
   const COLORS = {
     strand: '#09090a',
     bodyTop: '#101013',
@@ -899,10 +900,10 @@
         break;
       }
       case 'feast':
-        if (EDIBLES.every(E => E.state === 'eaten')) { MORPH.eaten = true; reshape(now); }
+        if (EDIBLES.every(E => E.state === 'eaten')) { MORPH.eaten = true; btn.textContent = LABELS.eaten; reshape(now); }
         break;
       case 'spit':
-        if (EDIBLES.every(E => E.state === 'page')) { MORPH.eaten = false; reshape(now); }
+        if (EDIBLES.every(E => E.state === 'page')) { MORPH.eaten = false; btn.textContent = LABELS.page; reshape(now); }
         break;
       case 'reshape':
         if (now - MORPH.reshapeAt > 800) {
@@ -1396,7 +1397,7 @@
     if ('letterSpacing' in ctx) ctx.letterSpacing = `${(-0.012 * fs).toFixed(2)}px`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText("let's collaborate", 0, 0);
+    ctx.fillText(MORPH.eaten ? LABELS.eaten : LABELS.page, 0, 0);
     if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
     ctx.restore();
   }

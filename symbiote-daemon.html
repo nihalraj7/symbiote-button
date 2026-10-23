@@ -262,7 +262,7 @@
     </div>
     <div class="cta">
       <div class="btn-wrap" id="wrap">
-        <button class="btn" id="cta" type="button">let's collaborate</button>
+        <button class="btn" id="cta" type="button">come closer</button>
       </div>
     </div>
   </main>
@@ -347,6 +347,7 @@
     pullMs: 420,         // base time to drag one piece into the mouth
     spitStagger: 70,
   };
+  const LABELS = { page: 'come closer', eaten: 'give it back' };
   const COLORS = {
     strand: '#09090a',
     bodyTop: '#101013',
@@ -921,10 +922,10 @@
         if (t >= 950) MORPH.next === 'vomit' ? startVomit(now) : startDevour(now);
         break;
       case 'feast':
-        if (EDIBLES.every(E => E.state === 'eaten')) { MORPH.eaten = true; MORPH.phase = 'sated'; MORPH.t0 = now; }
+        if (EDIBLES.every(E => E.state === 'eaten')) { MORPH.eaten = true; btn.textContent = LABELS.eaten; MORPH.phase = 'sated'; MORPH.t0 = now; }
         break;
       case 'vomit':
-        if (EDIBLES.every(E => E.state === 'page')) { MORPH.eaten = false; MORPH.phase = 'sated'; MORPH.t0 = now; }
+        if (EDIBLES.every(E => E.state === 'page')) { MORPH.eaten = false; btn.textContent = LABELS.page; MORPH.phase = 'sated'; MORPH.t0 = now; }
         break;
       case 'sated':
         if (MORPH.eaten && !MORPH.burped && t > 250) { MORPH.burped = true; Sound.burp(); MORPH.shake = 3; }
@@ -1436,7 +1437,7 @@
     if ('letterSpacing' in ctx) ctx.letterSpacing = `${(-0.012 * fs).toFixed(2)}px`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText("let's collaborate", 0, 0);
+    ctx.fillText(MORPH.eaten ? LABELS.eaten : LABELS.page, 0, 0);
     if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
     ctx.restore();
   }
