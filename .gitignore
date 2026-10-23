@@ -1,0 +1,11 @@
+# build output (Vercel rebuilds it from build.py)
+dist/
+
+# Vercel CLI link + local tokens
+.vercel/
+.env*
+
+# local tooling
+.claude/settings.local.json
+__pycache__/
+.DS_Store

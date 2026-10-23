@@ -1,0 +1,1686 @@
+<title>Symbiote Daemon</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
+<style>
+  /* Layout (daemon version): a quiet one-screen studio homepage (hairline nav / airy two-column hero, copy left and the button in the open space right / three small work tiles / hairline footer) whose hero CTA is the liquid button; the liquid, its strands, splatter and devoured page parts are painted on one canvas above the DOM. */
+  :root {
+    --paper: #F4F3EF;
+    --ink: #161615;
+    --soft: #A8A59D;
+    --muted: #85827A;
+    --line: #E2E0D9;
+    --stone-1: #E6E4DE;
+    --stone-2: #E5DED4;
+    --stone-3: #DFE3DC;
+    --clay: #C2A88E;
+    --moss: #AEB8AA;
+    --panel: rgba(250, 250, 248, 0.94);
+    --panel-line: #c9c9c4;
+    --font-label: "Outfit", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: "Outfit", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color-scheme: light;
+  }
+  html, body { height: 100%; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    overflow: hidden;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    html, body, button, input, label, a { cursor: none !important; }
+  }
+
+  /* ── the page it eats ── */
+  .site {
+    height: 100%;
+    max-width: 1240px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    gap: clamp(20px, 4vh, 44px);
+    padding-left: max(clamp(24px, 6vw, 88px), env(safe-area-inset-left, 0px));
+    padding-right: max(clamp(24px, 6vw, 88px), env(safe-area-inset-right, 0px));
+    padding-block: clamp(22px, 4.5vh, 40px) 52px;
+    font: 400 14px/1.6 var(--font-label);
+    color: var(--ink);
+  }
+  .rec .site { padding-block-end: clamp(22px, 4.5vh, 40px); }
+  .site a { color: inherit; text-decoration: none; }
+  [data-edible] { will-change: opacity; }
+
+  .nav { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+  .logo { font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
+  .links { display: flex; gap: clamp(18px, 3vw, 40px); font-size: 13px; color: var(--muted); }
+
+  /* copy on the left, the button sitting in the open space to its right */
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 40px;
+    min-height: 0;
+  }
+  .copy { display: grid; justify-items: start; gap: 22px; min-width: 0; }
+  .cta { display: grid; place-items: center; min-width: 0; }
+  .eyebrow { font: 400 11px/1 var(--font-mono); letter-spacing: 0.08em; color: var(--muted); }
+  .hero h1 {
+    margin: 0;
+    font-weight: 500;
+    font-size: clamp(34px, min(5vw, 8vh), 68px);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+  }
+  .hero h1 span { display: block; width: fit-content; }
+  .hero h1 span + span { color: var(--soft); }
+  .lede { margin: 0; max-width: 36ch; color: var(--muted); font-size: 15px; line-height: 1.65; text-wrap: pretty; }
+  .cta .btn-wrap { width: 272px; height: 70px; max-width: 100%; }
+  .ghost { font-size: 13px; color: var(--muted); }
+
+  .work { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 2.4vw, 32px); }
+  .piece { display: grid; grid-template-rows: auto auto; gap: 10px; border-radius: 4px; }
+  .thumb { height: clamp(70px, 14vh, 140px); border-radius: 4px; }
+  .t-notes { background: radial-gradient(circle at 62% 46%, var(--ink) 0 8%, transparent 8.6%), var(--stone-1); }
+  .t-kiln { background: radial-gradient(ellipse 15% 24% at 42% 62%, var(--clay) 0 95%, transparent 100%), var(--stone-2); }
+  .t-ledger { background: linear-gradient(to top, var(--moss) 0 26%, transparent 26%), var(--stone-3); }
+  .meta { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; }
+  .meta span { color: var(--muted); font: 400 11px/1.7 var(--font-mono); white-space: nowrap; }
+
+  .foot {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font: 400 11px/1 var(--font-mono);
+    color: var(--muted);
+  }
+
+  @media (max-width: 720px) {
+    .site { gap: 18px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+    .work { gap: 10px; }
+    .meta span { display: none; }
+    .meta { font-size: 11px; }
+    .hero { grid-template-columns: minmax(0, 1fr); align-content: center; gap: 32px; }
+    .cta { place-items: start; }
+  }
+
+/* ── demo chrome (hidden in clean-frame mode) ── */
+  .hint {
+    position: fixed;
+    z-index: 6;
+    left: 50%;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    display: flex; gap: 14px; align-items: center;
+    white-space: nowrap;
+    font: 400 11px/1 var(--font-mono);
+    color: var(--muted);
+  }
+  .hint kbd { font: inherit; padding: 2px 5px; border: 1px solid var(--line); border-radius: 4px; color: var(--ink); }
+  .hint button { font: inherit; color: var(--ink); background: transparent; border: 0; padding: 0; border-bottom: 1px solid var(--line); }
+  .hint button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .rec .hint { display: none; }
+  @media (max-width: 720px) { .hint .wide { display: none; } }
+  .toast {
+    position: fixed; z-index: 9; left: 50%; top: calc(18px + env(safe-area-inset-top, 0px));
+    transform: translate(-50%, -8px);
+    font: 500 11px/1 var(--font-mono); letter-spacing: 0.04em;
+    background: var(--ink); color: var(--paper);
+    padding: 9px 13px; border-radius: 999px;
+    opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  .btn-wrap {
+    --glow: 0;
+    position: relative;
+    width: min(340px, 100%);
+    height: 90px;
+  }
+  /* soft contact shadow pooled under the liquid */
+  .btn-wrap::after {
+    content: "";
+    position: absolute;
+    left: 8%; right: 8%; bottom: -18px;
+    height: 30px;
+    border-radius: 50%;
+    background: radial-gradient(50% 50% at 50% 50%, rgba(10, 10, 11, 0.45), rgba(10, 10, 11, 0) 72%);
+    filter: blur(6px);
+    opacity: var(--shadow, 1);
+    pointer-events: none;
+  }
+  /* reduced-motion proximity halo */
+  .btn-wrap::before {
+    content: "";
+    position: absolute;
+    inset: -34px -40px;
+    border-radius: 999px;
+    background: radial-gradient(50% 50% at 50% 50%, rgba(10, 10, 11, 0.16), rgba(10, 10, 11, 0) 70%);
+    opacity: var(--glow);
+    filter: blur(8px);
+    pointer-events: none;
+  }
+
+  /* hit area + focus target; the visible liquid is drawn on #fx */
+  .btn {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 999px;
+    padding: 0;
+    background: transparent;
+    color: transparent;
+    font: 800 27px/1 var(--font-label);
+    letter-spacing: -0.04em;
+  }
+  .btn:focus { outline: none; }
+  .btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 9px; }
+
+  #fx {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  #cursor {
+    position: fixed;
+    left: 0; top: 0;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0;
+    will-change: transform;
+    filter: drop-shadow(3px 5px 2.5px rgba(10, 10, 11, 0.30));
+  }
+  #cursor.on { opacity: 1; }
+  #cursorImg {
+    display: block;
+    width: 34px;
+    height: 40px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    transform-origin: 12px 2px;
+    transition: transform 0.12s cubic-bezier(.3, 1.6, .5, 1);
+  }
+  #cursor.grab #cursorImg { transform: scale(1.06, 0.93); }
+  #cursor.press #cursorImg { transform: scale(1.12, 0.84); }
+
+  #debug {
+    position: fixed;
+    z-index: 8;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    width: min(300px, calc(100vw - 32px));
+    max-height: calc(100% - 32px);
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 12px 14px 14px;
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 10px;
+    font: 11px/1.3 var(--font-mono);
+    color: var(--ink);
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.3);
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  #debug header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding-bottom: 8px; }
+  #debug header b { letter-spacing: 0.08em; text-transform: uppercase; font-size: 10px; }
+  #debug .rows { display: grid; grid-template-columns: 92px 1fr 44px; gap: 5px 8px; align-items: center; }
+  #debug label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #debug input[type=range] { width: 100%; min-width: 0; accent-color: var(--ink); }
+  #debug output { text-align: right; font-variant-numeric: tabular-nums; }
+  #debug .foot { display: flex; gap: 12px; align-items: center; padding-top: 10px; }
+  #debug button { font: inherit; padding: 3px 8px; border: 1px solid var(--panel-line); border-radius: 6px; background: transparent; color: var(--ink); }
+  #debug :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+</style>
+
+<div class="site">
+  <nav class="nav">
+    <a class="logo" href="#" data-edible>nihal</a>
+    <div class="links">
+      <a href="https://www.linkedin.com/in/nihal-raj-972b87195/" target="_blank" rel="noopener" data-edible>LinkedIn</a>
+      <a href="https://x.com/nihalraj_7" target="_blank" rel="noopener" data-edible>X</a>
+      <a href="https://github.com/nihalraj7" target="_blank" rel="noopener" data-edible>GitHub</a>
+    </div>
+  </nav>
+
+  <main class="hero">
+    <div class="copy">
+      <span class="eyebrow" data-edible>Interface studio — Bangalore</span>
+      <h1><span data-edible>Interfaces</span><span data-edible>that hold on.</span></h1>
+      <p class="lede" data-edible>Product surfaces with weight, memory and a little appetite. Forty-one launches, no dead buttons.</p>
+      <a class="ghost" href="#" data-edible>Selected work ↓</a>
+    </div>
+    <div class="cta">
+      <div class="btn-wrap" id="wrap">
+        <button class="btn" id="cta" type="button">let's collaborate</button>
+      </div>
+    </div>
+  </main>
+
+  <section class="work" aria-label="Selected work">
+    <article class="piece" data-edible><div class="thumb t-notes"></div><div class="meta">Field Notes <span>2026</span></div></article>
+    <article class="piece" data-edible><div class="thumb t-kiln"></div><div class="meta">Kiln <span>2025</span></div></article>
+    <article class="piece" data-edible><div class="thumb t-ledger"></div><div class="meta">Parcel Ledger <span>2025</span></div></article>
+  </section>
+
+  <footer class="foot">
+    <span data-edible>© 2026 Nihal</span>
+    <a href="https://x.com/nihalraj_7" target="_blank" rel="noopener" data-edible>Say hi on X ↗</a>
+  </footer>
+</div>
+
+<div class="hint" id="hint">
+  <span id="hintAct">click the button</span>
+  <span><kbd>M</kbd> <button type="button" id="soundBtn">sound on</button></span>
+  <span class="wide"><kbd>R</kbd> clean frame</span>
+  <span class="wide"><kbd>D</kbd> tune</span>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div id="cursor" aria-hidden="true"><img id="cursorImg" alt=""></div>
+<aside id="debug" hidden aria-label="Tuning panel">
+  <header><b>symbiote · tuning</b><span id="fps">– fps</span></header>
+  <div class="rows" id="knobs"></div>
+  <div class="foot">
+    <label><input type="checkbox" id="dbgOverlay"> overlay</label>
+    <button type="button" id="dbgReset">reset</button>
+    <span>press D to hide</span>
+  </div>
+</aside>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ───────────────────────── tunables ───────────────────────── */
+  const DEFAULTS = {
+    attachRadius: 180,   // px from the liquid edge where strands lunge
+    strandsMin: 30,
+    strandsMax: 44,
+    ropePoints: 14,      // verlet points per strand (applies to new strands)
+    stiffness: 0.86,     // constraint relaxation per iteration
+    iterations: 5,
+    damping: 0.9,        // velocity kept per 120 Hz step (lower = thicker, more viscous)
+    slack: 0.12,         // extra rope length at rest (fraction of span)
+    rootArc: 170,        // px of perimeter the bundle root spreads over
+    hoverArc: 70,        // tighter spread while hovering the pill itself
+    breakMin: 1.4,       // break distance range, × attachRadius
+    breakMax: 2.2,
+    widthMin: 1.0,
+    widthMax: 3.6,
+    necking: 1.4,        // how much a strand thins mid-span as it stretches
+    wobble: 260,         // curl/noise acceleration, px/s²
+    bend: 420,           // per-strand sideways bias, px/s²
+    emergeMin: 260,      // ms
+    emergeMax: 420,
+    stagger: 5,          // ms between strand launches
+    retractMs: 460,
+    cooldownMs: 500,
+    spikesMin: 4,
+    spikesMax: 8,
+    mound: 16,           // px the surface swells toward the cursor
+    surfSpring: 0.005,   // surface pull toward its target shape, per step
+    surfVisc: 0.9,       // surface velocity kept per step
+    surfSpread: 0.08,    // how fast a bulge flows sideways along the edge
+    idleMin: 1400,       // ms between idle twitches
+    idleMax: 3800,
+    ballMs: 440,         // click → pill rounds into a ball, then bursts
+    holdMs: 1900,        // ms after the click before the droplets flow home
+    burstDrops: 160,
+    burstSpeed: 1700,    // px/s
+    gravity: 320,        // px/s² on the spilled droplets
+    drag: 0.982,         // droplet velocity kept per step; thick liquid stops fast and sticks
+    daemonSize: 0.21,    // daemon radius, × the shorter screen side
+    reachMs: 240,        // a tendril lashing out to a page piece
+    coatMs: 260,         // the piece blackening from where the tendril hit
+    eatStagger: 170,     // ms between bites
+    pullMs: 420,         // base time to drag one piece into the mouth
+    spitStagger: 70,
+  };
+  const COLORS = {
+    strand: '#09090a',
+    bodyTop: '#101013',
+    bodyMid: '#050506',
+    bodyLow: '#0c0c0f',
+    glint: 'rgba(255,255,255,0.30)',
+    specular: 'rgba(255,255,255,0.55)',
+    rim: 'rgba(255,255,255,0.42)',
+    caustic: 'rgba(255,255,255,0.16)',
+    label: '#ffffff',
+    eye: '#FBF8F1',
+    eyeGlow: 'rgba(255,240,222,0.85)',
+    pupil: '#050506',
+    teeth: '#EEEAE1',
+    throat: '#5a1410',
+    handFill: '#ffffff',
+    handLine: '#0a0a0b',
+    overlay: 'rgba(10,10,11,0.35)',
+  };
+  const CFG = { ...DEFAULTS };
+  const H = 1 / 120;          // physics step
+  const S = 2;                // cursor pixel scale
+  const M = 200;              // samples around the liquid surface
+
+  /* ───────────────────────── helpers ───────────────────────── */
+  const TAU = Math.PI * 2;
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const randInt = (a, b) => Math.floor(rand(a, b + 1));
+  const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+  const mod = (a, n) => ((a % n) + n) % n;
+  const easeOutBack = t => { const c1 = 0.9, c3 = c1 + 1; return 1 + c3 * (t - 1) ** 3 + c1 * (t - 1) ** 2; };
+
+  const btn = document.getElementById('cta');
+  const wrap = document.getElementById('wrap');
+  const cv = document.getElementById('fx');
+  const ctx = cv.getContext('2d');
+  const cursorEl = document.getElementById('cursor');
+  const cursorImg = document.getElementById('cursorImg');
+  const dbg = document.getElementById('debug');
+
+  const mqReduce = matchMedia('(prefers-reduced-motion: reduce)');
+  let reduced = mqReduce.matches;
+  mqReduce.addEventListener?.('change', e => {
+    reduced = e.matches;
+    if (reduced) { strands.length = 0; spikes.length = 0; disp.fill(0); dvel.fill(0); }
+    else wrap.style.setProperty('--glow', 0);
+  });
+
+  /* ───────────────────────── pixel hand ───────────────────────── */
+  const HAND = [
+    '.....BB..........',
+    '....BWWB.........',
+    '....BWWB.........',
+    '....BWWB.........',
+    '....BWWB.........',
+    '....BWWBBB.......',
+    '....BWWBWWBBB....',
+    '....BWWBWWBWWBB..',
+    '.BB.BWWBWWBWWBWB.',
+    'BWWBBWWWWWWWWBWWB',
+    'BWWWBWWWWWWWWWWWB',
+    '.BWWBWWWWWWWWWWWB',
+    '..BWWWWWWWWWWWWWB',
+    '..BWWWWWWWWWWWWWB',
+    '...BWWWWWWWWWWWB.',
+    '...BWWWWWWWWWWWB.',
+    '....BWWWWWWWWWB..',
+    '....BWWWWWWWWWB..',
+    '.....BWWWWWWWB...',
+    '.....BBBBBBBBB...',
+  ];
+  // grabbed: index finger curls down to a stub
+  const GRAB = HAND.map((r, i) => i < 3 ? '.'.repeat(17) : i === 3 ? '.....BB..........' : r);
+  const HOT = { x: 6, y: 0 };
+  // tip anchors in sprite pixel coords: [x, y, isFingertip]
+  const ANCHORS = [
+    [6, 0.6, 1], [6, 0.6, 1], [4.4, 4, 0], [7.6, 4, 0],
+    [9, 6.2, 0], [12, 7.2, 0], [14.5, 8, 0], [16.6, 11, 0],
+    [0.4, 9.6, 0], [1.6, 8.4, 0], [2.4, 12.5, 0],
+    [3.2, 14.6, 0], [4.4, 17, 0], [7, 19.6, 0], [10, 19.6, 0],
+    [15.6, 14.5, 0], [14.4, 17, 0], [16.6, 13, 0],
+  ];
+  function spriteURL(rows) {
+    const c = document.createElement('canvas');
+    c.width = rows[0].length; c.height = rows.length;
+    const g = c.getContext('2d');
+    rows.forEach((row, y) => [...row].forEach((ch, x) => {
+      if (ch === '.') return;
+      g.fillStyle = ch === 'B' ? COLORS.handLine : COLORS.handFill;
+      g.fillRect(x, y, 1, 1);
+    }));
+    return c.toDataURL();
+  }
+  const SPRITE_POINT = spriteURL(HAND);
+  const SPRITE_GRAB = spriteURL(GRAB);
+  cursorImg.src = SPRITE_POINT;
+
+  /* ───────────────────────── geometry (stadium perimeter) ───────────────────────── */
+  const base = { cx: 0, cy: 0, w: 340, h: 90 };
+  const G = { cx: 0, cy: 0, r: 45, Ls: 250, c1x: 0, c2x: 0, P: 1, h: 90 };
+  let bsx = 1, bsy = 1;
+  // m: 0 = pill, 1 = ball (spring, so it overshoots and jiggles); scale: 0 = burst/gone, 1 = whole
+  const MORPH = { phase: 'idle', next: 'burst', t0: 0, t0r: 0, m: 0, mV: 0, mTarget: 0, scale: 1, ballR: 70, mass: 0, total: 1, merged: 0, freeCount: 0, reshapeAt: 0, swell: 0, swellTarget: 0, eaten: false,
+    big: 0, bigV: 0, bigTarget: 0, mouth: 0, mouthV: 0, shake: 0, blinkAt: 0, blinkStart: -1e9, look: null, burped: false, spitN: 1 };
+
+  function measure() {
+    const r = wrap.getBoundingClientRect();
+    base.cx = r.left + r.width / 2; base.cy = r.top + r.height / 2;
+    base.w = r.width; base.h = r.height;
+  }
+  function updateGeom() {
+    const w = base.w * bsx, h = base.h * bsy;
+    const ls = Math.max(0, w - h);
+    // the ball keeps most of the pill's volume
+    MORPH.ballR = Math.sqrt((ls * h + Math.PI * (h / 2) ** 2) / Math.PI) * 0.74;
+    const m = MORPH.m;
+    // big: 0 = button-sized, 1 = the daemon, floating mid-screen
+    const big = clamp(MORPH.big, 0, 1.2);
+    const r0 = (h / 2 + (MORPH.ballR - h / 2) * m) * MORPH.scale;
+    const dR = Math.min(vw, vh) * CFG.daemonSize;
+    const bob = Math.sin(performance.now() / 1000 * 1.4) * 6 * clamp(big, 0, 1);
+    G.cx = base.cx + (vw / 2 - base.cx) * clamp(big, 0, 1);
+    G.cy = base.cy + (vh * 0.5 - base.cy) * clamp(big, 0, 1) + bob;
+    G.r = Math.max(0.5, (r0 + (dR - r0) * big) * (1 + MORPH.swell));
+    G.h = G.r * 2;
+    G.Ls = ls * Math.max(0, 1 - m) * MORPH.scale;
+    G.c1x = G.cx - G.Ls / 2; G.c2x = G.cx + G.Ls / 2;
+    G.P = 2 * G.Ls + TAU * G.r;
+  }
+  const tmp = { x: 0, y: 0, nx: 0, ny: 0 };
+  function pointAt(s, out) {
+    const { Ls, r, c1x, c2x, cy } = G;
+    s = mod(s, G.P);
+    const arc = Math.PI * r;
+    if (s < Ls) { out.x = c1x + s; out.y = cy - r; out.nx = 0; out.ny = -1; }
+    else if (s < Ls + arc) { const a = -Math.PI / 2 + (s - Ls) / r; out.nx = Math.cos(a); out.ny = Math.sin(a); out.x = c2x + out.nx * r; out.y = cy + out.ny * r; }
+    else if (s < 2 * Ls + arc) { out.x = c2x - (s - Ls - arc); out.y = cy + r; out.nx = 0; out.ny = 1; }
+    else { const a = Math.PI / 2 + (s - 2 * Ls - arc) / r; out.nx = Math.cos(a); out.ny = Math.sin(a); out.x = c1x + out.nx * r; out.y = cy + out.ny * r; }
+    return out;
+  }
+  const prox = { s: 0, d: 1e9 };
+  function closest(px, py, out = prox) {
+    const { Ls, r, c1x, c2x, cy } = G;
+    const qx = clamp(px, c1x, c2x);
+    const dx = px - qx, dy = py - cy;
+    out.d = Math.hypot(dx, dy) - r;
+    const arc = Math.PI * r;
+    if (px > c1x && px < c2x) out.s = dy < 0 ? px - c1x : Ls + arc + (c2x - px);
+    else if (px >= c2x) out.s = Ls + (Math.atan2(dy, dx) + Math.PI / 2) * r;
+    else { let a = Math.atan2(dy, dx); if (a < 0) a += TAU; out.s = 2 * Ls + arc + (a - Math.PI / 2) * r; }
+    out.s = mod(out.s, G.P);
+    return out;
+  }
+
+  /* ───────────────────────── liquid surface ─────────────────────────
+     The edge is a ring of M samples, each displaced along its normal. Displacement
+     chases a target shape (a swell toward the cursor, a lump under every strand root)
+     through a heavily damped spring plus sideways diffusion, so bulges ooze rather than snap. */
+  const disp = new Float32Array(M), dvel = new Float32Array(M), dtgt = new Float32Array(M);
+  function addBump(arr, s, A, sigma) {
+    const ds = G.P / M;
+    const c = mod(s, G.P) / ds;
+    const r = Math.ceil(3 * sigma / ds);
+    const k0 = Math.round(c);
+    const inv = 1 / (2 * sigma * sigma);
+    for (let j = -r; j <= r; j++) {
+      const k = k0 + j;
+      const off = (k - c) * ds;
+      arr[mod(k, M)] += A * Math.exp(-off * off * inv);
+    }
+  }
+  function dispAt(s) {
+    const f = mod(s, G.P) / G.P * M;
+    const k = Math.floor(f), t = f - k;
+    return disp[k % M] * (1 - t) + disp[(k + 1) % M] * t;
+  }
+  function surfAt(s, inset, out) {
+    pointAt(s, out);
+    const d = dispAt(s) - inset;
+    out.x += out.nx * d; out.y += out.ny * d;
+    return out;
+  }
+  function stepSurface() {
+    const K = CFG.surfSpring, V = CFG.surfVisc, C = CFG.surfSpread;
+    for (let k = 0; k < M; k++) {
+      const lap = disp[(k + M - 1) % M] + disp[(k + 1) % M] - 2 * disp[k];
+      dvel[k] = (dvel[k] + (dtgt[k] - disp[k]) * K + lap * C) * V;
+    }
+    for (let k = 0; k < M; k++) disp[k] += dvel[k];
+  }
+
+  /* ───────────────────────── canvas ───────────────────────── */
+  let dpr = 1, vw = 0, vh = 0;
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    vw = innerWidth; vh = innerHeight;
+    cv.width = Math.round(vw * dpr); cv.height = Math.round(vh * dpr);
+    measure();
+  }
+  addEventListener('resize', resize);
+  addEventListener('scroll', measure, { passive: true });
+  if (window.ResizeObserver) new ResizeObserver(measure).observe(wrap);
+  document.fonts?.ready.then(measure);
+
+  /* ───────────────────────── state ───────────────────────── */
+  const pointer = { x: -1e4, y: -1e4, active: false, type: 'mouse' };
+  const strands = [], spikes = [];
+  let bundleTarget = 0, cooldownUntil = 0, gripUntil = 0, nextTwitch = 0;
+  let arcNow = CFG.rootArc;
+  let grabbing = false, glow = 0, reflX = 0;
+  let sc = 1, scV = 0;
+
+  /* ───────────────────────── sound (synthesised, no files) ───────────────────────── */
+  const Sound = (() => {
+    let ac = null, master = null, noiseBuf = null, muted = false;
+    const last = {};
+    const VOL = 0.8;
+    function init() {
+      if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      ac = new AC();
+      const comp = ac.createDynamicsCompressor();
+      comp.threshold.value = -16; comp.ratio.value = 5;
+      master = ac.createGain();
+      master.gain.value = muted ? 0 : VOL;
+      master.connect(comp).connect(ac.destination);
+      noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+      const ch = noiseBuf.getChannelData(0);
+      for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+    }
+    const ready = (key, gap) => {
+      if (!ac || muted) return false;
+      const t = performance.now();
+      if (key && last[key] && t - last[key] < gap) return false;
+      if (key) last[key] = t;
+      return true;
+    };
+    function env(g, t, dur, vol) {
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + Math.min(0.012, dur * 0.25));
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    }
+    function noise(t, dur, type, f0, f1, q, vol) {
+      const src = ac.createBufferSource(); src.buffer = noiseBuf;
+      const f = ac.createBiquadFilter(); f.type = type; f.Q.value = q;
+      f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      const g = ac.createGain(); env(g, t, dur, vol);
+      src.connect(f).connect(g).connect(master);
+      src.start(t, Math.random() * 0.6); src.stop(t + dur + 0.05);
+    }
+    function tone(t, dur, type, f0, f1, vol) {
+      const o = ac.createOscillator(); o.type = type;
+      o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      const g = ac.createGain(); env(g, t, dur, vol);
+      o.connect(g).connect(master);
+      o.start(t); o.stop(t + dur + 0.05);
+    }
+    return {
+      init,
+      get muted() { return muted; },
+      toggle() { muted = !muted; if (master) master.gain.value = muted ? 0 : VOL; return muted; },
+      // strands latch on: a wet suck
+      squelch(k = 1) {
+        if (!ready('squelch', 140)) return;
+        const t = ac.currentTime;
+        noise(t, 0.18, 'bandpass', 950, 220, 3, 0.5 * k);
+        noise(t + 0.03, 0.12, 'bandpass', 1500, 480, 4, 0.22 * k);
+        tone(t, 0.14, 'sine', 150, 60, 0.32 * k);
+      },
+      // a strand lets go
+      snap() {
+        if (!ready('snap', 45)) return;
+        const t = ac.currentTime;
+        noise(t, 0.035, 'highpass', 2600, 1800, 0.7, 0.1);
+        tone(t, 0.07, 'triangle', rand(700, 1100), 200, 0.07);
+      },
+      // a droplet lands
+      splat(v = 1) {
+        if (!ready('splat', 24)) return;
+        const t = ac.currentTime;
+        noise(t, rand(0.04, 0.08), 'bandpass', rand(500, 1300), rand(180, 380), 5, 0.16 * v);
+      },
+      // the ball tightens before it goes
+      tense() {
+        if (!ready('tense', 300)) return;
+        const t = ac.currentTime;
+        tone(t, CFG.ballMs / 1000, 'sine', 70, 140, 0.18);
+        noise(t, CFG.ballMs / 1000, 'bandpass', 300, 1200, 8, 0.12);
+      },
+      burst() {
+        if (!ready()) return;
+        const t = ac.currentTime;
+        noise(t, 0.5, 'lowpass', 4500, 160, 0.8, 0.95);
+        tone(t, 0.4, 'sine', 120, 36, 0.85);
+        noise(t + 0.02, 0.22, 'bandpass', 1900, 380, 2, 0.4);
+      },
+      // the daemon wakes
+      growl() {
+        if (!ready('growl', 400)) return;
+        const t = ac.currentTime, d = 1.1;
+        const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 6;
+        lp.frequency.setValueAtTime(180, t); lp.frequency.exponentialRampToValueAtTime(700, t + 0.5); lp.frequency.exponentialRampToValueAtTime(220, t + d);
+        const g = ac.createGain(); env(g, t, d, 0.55);
+        const trem = ac.createGain(); trem.gain.value = 0.6;
+        const lfo = ac.createOscillator(); lfo.frequency.value = 9;
+        const lfoAmt = ac.createGain(); lfoAmt.gain.value = 0.4;
+        lfo.connect(lfoAmt).connect(trem.gain);
+        for (const f of [52, 55.5, 104]) {
+          const o = ac.createOscillator(); o.type = 'sawtooth';
+          o.frequency.setValueAtTime(f * 0.8, t); o.frequency.exponentialRampToValueAtTime(f, t + 0.4);
+          o.connect(lp); o.start(t); o.stop(t + d + 0.05);
+        }
+        lp.connect(trem).connect(g).connect(master);
+        lfo.start(t); lfo.stop(t + d + 0.05);
+        noise(t, 0.9, 'bandpass', 220, 600, 3, 0.18);
+      },
+      chomp() {
+        if (!ready('chomp', 60)) return;
+        const t = ac.currentTime;
+        noise(t, 0.09, 'lowpass', 1400, 260, 1, 0.55);
+        tone(t, 0.14, 'sine', 95, 42, 0.7);
+        noise(t, 0.02, 'highpass', 3000, 2000, 0.7, 0.15);
+      },
+      burp() {
+        if (!ready('burp', 800)) return;
+        const t = ac.currentTime, d = 0.55;
+        const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 2.5;
+        bp.frequency.setValueAtTime(520, t); bp.frequency.exponentialRampToValueAtTime(300, t + d);
+        const g = ac.createGain(); env(g, t, d, 0.6);
+        const o = ac.createOscillator(); o.type = 'sawtooth';
+        o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(72, t + d);
+        const lfo = ac.createOscillator(); lfo.frequency.value = 22;
+        const amt = ac.createGain(); amt.gain.value = 18;
+        lfo.connect(amt).connect(o.frequency);
+        o.connect(bp).connect(g).connect(master);
+        o.start(t); o.stop(t + d + 0.05); lfo.start(t); lfo.stop(t + d + 0.05);
+      },
+      // a page element is sucked in and swallowed
+      slurp() {
+        if (!ready('slurp', 55)) return;
+        const t = ac.currentTime, d = rand(0.18, 0.28);
+        noise(t, d, 'bandpass', 280, 1700, 6, 0.32);
+        tone(t, d, 'triangle', 170, rand(520, 780), 0.1);
+        tone(t + d * 0.9, 0.1, 'sine', 160, 65, 0.42);
+      },
+      spit() {
+        if (!ready('spit', 45)) return;
+        const t = ac.currentTime;
+        noise(t, 0.16, 'bandpass', 1600, 280, 5, 0.28);
+        tone(t, 0.13, 'triangle', 620, 150, 0.1);
+      },
+    };
+  })();
+  addEventListener('pointerdown', () => Sound.init(), true);
+  addEventListener('keydown', () => Sound.init(), true);
+
+  /* ───────────────────────── the page it eats ───────────────────────── */
+  const EDIBLES = [...document.querySelectorAll('[data-edible]')].map(el => ({
+    el, x: 0, y: 0, w: 0, h: 0, rad: 0, blobs: [], state: 'page', t0: 0, startAt: 0, dur: 0, drainFrom: 0,
+  }));
+  function measureEdibles() {
+    for (const E of EDIBLES) {
+      if (E.state !== 'page') continue;
+      const r = E.el.getBoundingClientRect();
+      E.x = r.left; E.y = r.top; E.w = r.width; E.h = r.height;
+      const br = parseFloat(getComputedStyle(E.el).borderTopLeftRadius) || 0;
+      E.rad = Math.min(br, r.height / 2, r.width / 2);
+    }
+  }
+  addEventListener('resize', measureEdibles);
+  document.fonts?.ready.then(measureEdibles);
+  document.querySelectorAll('a[href="#"]').forEach(a => a.addEventListener('click', e => e.preventDefault()));
+
+  const hintAct = document.getElementById('hintAct');
+  const siteEl = document.querySelector('.site');
+  const soundBtn = document.getElementById('soundBtn');
+  const toastEl = document.getElementById('toast');
+  let toastTimer = 0;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1600);
+  }
+  function toggleSound() {
+    const m = Sound.toggle();
+    soundBtn.textContent = m ? 'sound off' : 'sound on';
+  }
+  soundBtn.addEventListener('click', toggleSound);
+
+  /* ───────────────────────── input ───────────────────────── */
+  function placeCursor() {
+    cursorEl.style.transform = `translate3d(${pointer.x - HOT.x * S}px, ${pointer.y - HOT.y * S}px, 0)`;
+  }
+  function onMove(e) {
+    pointer.type = e.pointerType || 'mouse';
+    if (pointer.type === 'touch' && !pointer.active) return;
+    pointer.x = e.clientX; pointer.y = e.clientY;
+    if (pointer.type !== 'touch') { pointer.active = true; cursorEl.classList.add('on'); placeCursor(); }
+  }
+  addEventListener('pointermove', onMove, { passive: true });
+  addEventListener('pointerdown', e => {
+    pointer.type = e.pointerType || 'mouse';
+    pointer.x = e.clientX; pointer.y = e.clientY;
+    pointer.active = true;
+    if (pointer.type === 'touch') cursorEl.classList.remove('on');
+    else { cursorEl.classList.add('on', 'press'); placeCursor(); }
+  });
+  const release = e => {
+    cursorEl.classList.remove('press');
+    if ((e.pointerType || pointer.type) === 'touch') pointer.active = false;
+  };
+  addEventListener('pointerup', release);
+  addEventListener('pointercancel', release);
+  document.addEventListener('pointerleave', () => { if (pointer.type !== 'touch') { pointer.active = false; cursorEl.classList.remove('on'); } });
+  document.documentElement.addEventListener('mouseleave', () => { pointer.active = false; cursorEl.classList.remove('on'); });
+  addEventListener('blur', () => { pointer.active = false; cursorEl.classList.remove('on'); });
+
+  function squeeze(now) {
+    if (MORPH.phase !== 'idle') return;
+    scV -= reduced ? 0.8 : 2.0;
+    if (!reduced) startBall(now, MORPH.eaten ? 'vomit' : 'feast');
+  }
+  btn.addEventListener('pointerdown', () => squeeze(performance.now()));
+  btn.addEventListener('click', e => { if (e.detail === 0) squeeze(performance.now()); });
+
+  /* ───────────────────────── strands ───────────────────────── */
+  function liveCount() {
+    let c = 0;
+    for (const st of strands) if (st.state !== 'retract') c++;
+    return c;
+  }
+  function pickAnchor() {
+    if (pointer.type === 'touch') {
+      const a = rand(0, TAU), r = rand(3, 16);
+      return { dx: Math.cos(a) * r, dy: Math.sin(a) * r, finger: false };
+    }
+    const a = ANCHORS[(Math.random() * ANCHORS.length) | 0];
+    return { dx: (a[0] - HOT.x) * S + rand(-1, 1), dy: (a[1] - HOT.y) * S + rand(-1, 1), finger: !!a[2] };
+  }
+  function spawn(k, now) {
+    const n = clamp(CFG.ropePoints | 0, 4, 24);
+    const spread = CFG.stagger * k;
+    Sound.squelch(clamp(k / 36, 0.35, 1));
+    const wmin = Math.min(CFG.widthMin, CFG.widthMax), wmax = Math.max(CFG.widthMin, CFG.widthMax);
+    for (let j = 0; j < k; j++) {
+      const st = {
+        n,
+        x: new Float32Array(n), y: new Float32Array(n), px: new Float32Array(n), py: new Float32Array(n),
+        offN: (j + 0.5) / k - 0.5 + rand(-0.6, 0.6) / k,
+        s: 0,
+        anchor: pickAnchor(),
+        width: wmin + (wmax - wmin) * Math.random() ** 1.3,
+        alpha: rand(0.85, 1),
+        breakDist: CFG.attachRadius * rand(Math.min(CFG.breakMin, CFG.breakMax), Math.max(CFG.breakMin, CFG.breakMax)),
+        state: 'emerge', t0: now, delay: rand(0, spread) + rand(0, 14),
+        dur: rand(CFG.emergeMin, Math.max(CFG.emergeMin, CFG.emergeMax)),
+        rest: 0, rest0: 0, stretch: 0,
+        phase: rand(0, TAU), freq: rand(1.4, 3.2), bias: rand(-1, 1),
+        hidden: true, dead: false,
+      };
+      st.s = mod(prox.s + st.offN * arcNow, G.P);
+      surfAt(st.s, 3, tmp);
+      st.x.fill(tmp.x); st.px.fill(tmp.x); st.y.fill(tmp.y); st.py.fill(tmp.y);
+      strands.push(st);
+    }
+  }
+  function snap(st, now) {
+    st.state = 'retract';
+    st.t0 = now;
+    st.rest0 = st.rest;
+    Sound.snap();
+    const n = st.n, X = st.x, Y = st.y;
+    // whip: kick the freed tip back toward its root, with a sideways flick
+    const kx = (X[0] - X[n - 1]) * 0.035, ky = (Y[0] - Y[n - 1]) * 0.035;
+    const f = rand(-0.5, 0.5);
+    st.px[n - 1] = X[n - 1] - kx + ky * f;
+    st.py[n - 1] = Y[n - 1] - ky - kx * f;
+    if (liveCount() === 0) cooldownUntil = now + CFG.cooldownMs;
+  }
+  function settle(st, now) {
+    st.dead = true;
+    // the bead lands: the surface takes a slow bounce where it re-entered
+    addBump(dvel, st.s, 0.35 + st.width * 0.12, 9);
+    if (spikes.length < 140) {
+      const k = randInt(Math.min(CFG.spikesMin, CFG.spikesMax), Math.max(CFG.spikesMin, CFG.spikesMax));
+      for (let i = 0; i < k; i++) {
+        spikes.push({ s: st.s + rand(-10, 10), len: rand(5, 15) * (0.7 + st.width * 0.2), w: rand(1.6, 3), t0: now + rand(0, 60), life: rand(480, 900), tilt: rand(-0.35, 0.35), curl: rand(-1, 1), phase: rand(0, TAU), mode: 'settle' });
+      }
+    }
+  }
+  const tmp2 = { x: 0, y: 0 };
+  function tipTarget(st) {
+    const a = st.anchor;
+    tmp2.x = pointer.x + a.dx;
+    tmp2.y = pointer.y + a.dy + (a.finger && grabbing ? 3.4 * S : 0);
+    return tmp2;
+  }
+
+  /* ───────────────────────── the daemon ─────────────────────────
+     click → the pill balls up, then swells into a huge spiked blob with eyes and a
+     mouth and drifts to the middle of the screen. It lashes a tendril at every piece
+     of the page, coats it, drags it into its mouth and chomps, growing with each bite.
+     Fed, it burps and shrinks back into the button. Click again and it throws it all up. */
+  const tmpP = { s: 0, d: 0 };
+  const crown = [];
+  const stageX = () => vw / 2, stageY = () => vh * 0.5;
+  const distToStage = E => Math.hypot(E.x + E.w / 2 - stageX(), E.y + E.h / 2 - stageY());
+  const mouthX = () => G.cx, mouthY = () => G.cy + G.r * 0.36;
+  function startBall(now, next) {
+    MORPH.phase = 'ball'; MORPH.next = next; MORPH.t0 = now; MORPH.mTarget = 1; MORPH.mV += 1.2;
+    for (const st of strands) if (st.state !== 'retract') snap(st, now);
+    cooldownUntil = Infinity;
+    if (next === 'feast') measureEdibles();
+    Sound.tense();
+  }
+  function startRise(now) {
+    MORPH.phase = 'rise'; MORPH.t0 = now; MORPH.bigTarget = 1;
+    MORPH.swellTarget = MORPH.next === 'vomit' ? 0.36 : 0;
+    MORPH.blinkAt = now + 1500;
+    crown.length = 0;
+    const N = 13;
+    for (let i = 0; i < N; i++) {
+      const u = i / (N - 1);
+      crown.push({ a: -Math.PI / 2 + (u - 0.5) * 2.4, len: 0.16 + 0.3 * (1 - Math.abs(u - 0.5) * 2) ** 1.3 + rand(0, 0.06), w: rand(0.05, 0.08), ph: rand(0, TAU), f: rand(1.2, 2.4) });
+    }
+    for (let i = 0; i < 8; i++) {
+      const side = i % 2 ? 1 : -1;
+      crown.push({ a: -Math.PI / 2 + side * rand(1.35, 2.3), len: rand(0.06, 0.13), w: rand(0.035, 0.05), ph: rand(0, TAU), f: rand(1.5, 3) });
+    }
+    Sound.growl();
+    MORPH.shake = 3;
+  }
+  function startDevour(now) {
+    MORPH.phase = 'feast';
+    EDIBLES.filter(E => E.state === 'page').sort((a, b) => distToStage(a) - distToStage(b))
+      .forEach((E, i) => { E.state = 'menu'; E.startAt = now + 100 + i * CFG.eatStagger; });
+  }
+  function startVomit(now) {
+    MORPH.phase = 'vomit';
+    const list = EDIBLES.filter(E => E.state === 'eaten').sort((a, b) => distToStage(b) - distToStage(a));
+    MORPH.spitN = Math.max(1, list.length);
+    list.forEach((E, i) => { E.state = 'queued'; E.startAt = now + 200 + i * CFG.spitStagger; });
+  }
+  function reshape(now) {
+    MORPH.phase = 'reshape'; MORPH.mTarget = 0; MORPH.mV -= 0.6; MORPH.reshapeAt = now;
+    MORPH.swellTarget = 0; MORPH.scale = 1;
+  }
+  function updateMorph(now, dt) {
+    if (MORPH.phase === 'idle') return;
+    MORPH.mV += ((MORPH.mTarget - MORPH.m) * 170 - MORPH.mV * 11) * dt;
+    MORPH.m += MORPH.mV * dt;
+    MORPH.swell += (MORPH.swellTarget - MORPH.swell) * Math.min(1, dt * 7);
+    MORPH.bigV += ((MORPH.bigTarget - MORPH.big) * 55 - MORPH.bigV * 12) * dt;
+    MORPH.big += MORPH.bigV * dt;
+    // the mouth: gapes while something is being dragged in, snaps shut on each bite
+    let mt = 0;
+    if (MORPH.phase === 'rise') mt = 0.3;
+    else if (MORPH.phase === 'feast') mt = EDIBLES.some(E => E.state === 'pull') ? 1 : EDIBLES.some(E => E.state === 'reach' || E.state === 'coat') ? 0.4 : 0.12;
+    else if (MORPH.phase === 'vomit') mt = EDIBLES.some(E => E.state === 'queued' || E.state === 'spit') ? 1.05 : 0.2;
+    else if (MORPH.phase === 'sated') mt = MORPH.eaten && now - MORPH.t0 > 250 && now - MORPH.t0 < 650 ? 0.7 : 0.04;
+    MORPH.mouthV += ((mt - MORPH.mouth) * 140 - MORPH.mouthV * 14) * dt;
+    MORPH.mouth += MORPH.mouthV * dt;
+    MORPH.shake *= Math.exp(-dt * 10);
+    const t = now - MORPH.t0;
+    switch (MORPH.phase) {
+      case 'ball':
+        if (t >= CFG.ballMs) startRise(now);
+        break;
+      case 'rise':
+        if (t >= 950) MORPH.next === 'vomit' ? startVomit(now) : startDevour(now);
+        break;
+      case 'feast':
+        if (EDIBLES.every(E => E.state === 'eaten')) { MORPH.eaten = true; MORPH.phase = 'sated'; MORPH.t0 = now; }
+        break;
+      case 'vomit':
+        if (EDIBLES.every(E => E.state === 'page')) { MORPH.eaten = false; MORPH.phase = 'sated'; MORPH.t0 = now; }
+        break;
+      case 'sated':
+        if (MORPH.eaten && !MORPH.burped && t > 250) { MORPH.burped = true; Sound.burp(); MORPH.shake = 3; }
+        if (t >= 1000) { MORPH.phase = 'return'; MORPH.t0 = now; MORPH.bigTarget = 0; MORPH.swellTarget = 0; MORPH.burped = false; }
+        break;
+      case 'return':
+        if (t >= 750) { MORPH.big = 0; MORPH.bigV = 0; crown.length = 0; reshape(now); }
+        break;
+      case 'reshape':
+        if (now - MORPH.reshapeAt > 800) {
+          MORPH.phase = 'idle'; MORPH.m = 0; MORPH.mV = 0; MORPH.scale = 1; MORPH.swell = 0;
+          cooldownUntil = now + 400;
+          hintAct.textContent = MORPH.eaten ? 'click to make it give the page back' : 'click the button';
+        }
+        break;
+    }
+    wrap.style.setProperty('--shadow', (MORPH.scale * (1 - 0.35 * clamp(MORPH.m, 0, 1)) * (1 - clamp(MORPH.big, 0, 1))).toFixed(3));
+  }
+  function updateEdibles(now) {
+    for (const E of EDIBLES) {
+      switch (E.state) {
+        case 'menu':
+          if (now >= E.startAt) {
+            E.state = 'reach'; E.t0 = now; MORPH.look = E;
+            E.px = clamp(G.cx, E.x, E.x + E.w); E.py = clamp(G.cy, E.y, E.y + E.h);
+            Sound.squelch(0.5);
+          }
+          break;
+        case 'reach':
+          if (now - E.t0 >= CFG.reachMs) {
+            E.state = 'coat'; E.t0 = now;
+            E.blobs = [{ x: E.px - E.x, y: E.py - E.y, r0: 6, t0: now, ph: rand(0, TAU) }];
+            Sound.splat(1.2);
+          }
+          break;
+        case 'coat':
+          if (now - E.t0 >= CFG.coatMs) {
+            E.state = 'pull'; E.t0 = now; E.el.style.opacity = '0'; E.el.style.pointerEvents = 'none';
+            E.dur = CFG.pullMs + Math.hypot(E.x + E.w / 2 - mouthX(), E.y + E.h / 2 - mouthY()) * 0.25;
+          }
+          break;
+        case 'pull':
+          if (now - E.t0 >= E.dur) {
+            E.state = 'eaten';
+            MORPH.swellTarget += 0.03;
+            MORPH.mouthV = -9;                       // chomp
+            MORPH.shake = 5;
+            for (let k = 0; k < M; k++) dvel[k] += 0.9;
+            Sound.chomp(); Sound.slurp();
+          }
+          break;
+        case 'queued':
+          if (now >= E.startAt) {
+            E.state = 'spit'; E.t0 = now; MORPH.look = E;
+            E.dur = 420 + Math.hypot(E.x + E.w / 2 - mouthX(), E.y + E.h / 2 - mouthY()) * 0.22;
+            MORPH.swellTarget = Math.max(0, MORPH.swellTarget - 0.36 / MORPH.spitN);
+            MORPH.shake = 2;
+            Sound.spit();
+          }
+          break;
+        case 'spit':
+          if (now - E.t0 >= E.dur) {
+            E.state = 'drain'; E.t0 = now; E.el.style.opacity = ''; E.el.style.pointerEvents = '';
+            E.blobs = [{ x: E.w / 2, y: E.h / 2, r0: 0, t0: -1e9, ph: rand(0, TAU) }];
+            Sound.splat(1.3);
+          }
+          break;
+        case 'drain':
+          if (now - E.t0 >= 650) { E.state = 'page'; E.blobs.length = 0; }
+          break;
+      }
+    }
+  }
+
+  function step(now) {
+    const tsec = now / 1000;
+    const h2 = H * H;
+    const slideK = 1 - Math.exp(-H * 8);
+    stepSurface();
+    for (const st of strands) {
+      if (st.dead) continue;
+      const n = st.n, X = st.x, Y = st.y, PX = st.px, PY = st.py;
+
+      if (st.state !== 'retract') {
+        const tgt = mod(prox.s + st.offN * arcNow, G.P);
+        const dl = mod(tgt - st.s + G.P / 2, G.P) - G.P / 2;
+        st.s = mod(st.s + dl * slideK, G.P);
+      }
+      surfAt(st.s, 3, tmp);
+      const rx = tmp.x, ry = tmp.y;
+      X[0] = PX[0] = rx; Y[0] = PY[0] = ry;
+
+      let tipPinned = true, tx = 0, ty = 0;
+      if (st.state === 'emerge') {
+        const t = (now - st.t0 - st.delay) / st.dur;
+        if (t < 0) { X.fill(rx); PX.fill(rx); Y.fill(ry); PY.fill(ry); st.hidden = true; continue; }
+        st.hidden = false;
+        const T = tipTarget(st);
+        const e = easeOutBack(Math.min(t, 1));
+        tx = rx + (T.x - rx) * e; ty = ry + (T.y - ry) * e;
+        st.rest = Math.hypot(tx - rx, ty - ry) * (1 + CFG.slack);
+        if (t >= 1) st.state = 'attached';
+        if (!pointer.active && Math.random() < 0.1) { snap(st, now); tipPinned = false; }
+      } else if (st.state === 'attached') {
+        const T = tipTarget(st);
+        tx = T.x; ty = T.y;
+        const d = Math.hypot(tx - rx, ty - ry);
+        st.stretch = d / st.breakDist;
+        if (st.stretch > 1 || (!pointer.active && Math.random() < 0.1)) { snap(st, now); tipPinned = false; }
+        else {
+          const k = 1 - st.stretch;
+          st.rest = now < gripUntil ? d * 0.93 : d * (1 + CFG.slack * k * k);
+        }
+      }
+      let retractT = 0;
+      if (st.state === 'retract') {
+        tipPinned = false;
+        retractT = (now - st.t0) / CFG.retractMs;
+        if (retractT >= 1) { settle(st, now); continue; }
+        st.rest = st.rest0 * (1 - retractT) ** 1.5;
+        st.stretch *= 0.92;
+      }
+
+      // integrate
+      const ex = (tipPinned ? tx : X[n - 1]) - rx, ey = (tipPinned ? ty : Y[n - 1]) - ry;
+      const el = Math.hypot(ex, ey) || 1;
+      const perpX = -ey / el, perpY = ex / el;
+      const damp = CFG.damping;
+      const kR = retractT ? 110 * (0.4 + retractT) : 0;
+      const last = tipPinned ? n - 1 : n;
+      for (let i = 1; i < last; i++) {
+        const u = i / (n - 1);
+        const env = Math.sin(Math.PI * Math.min(u, 0.999));
+        const lat = (Math.sin(tsec * st.freq + st.phase + i * 0.7) * CFG.wobble + st.bias * CFG.bend) * env;
+        let ax = perpX * lat, ay = perpY * lat;
+        if (kR) { ax += (rx - X[i]) * kR; ay += (ry - Y[i]) * kR; }
+        const vx = (X[i] - PX[i]) * damp, vy = (Y[i] - PY[i]) * damp;
+        PX[i] = X[i]; PY[i] = Y[i];
+        X[i] += vx + ax * h2; Y[i] += vy + ay * h2;
+      }
+      if (tipPinned) { PX[n - 1] = X[n - 1]; PY[n - 1] = Y[n - 1]; X[n - 1] = tx; Y[n - 1] = ty; }
+
+      // constraints
+      const L = st.rest / (n - 1);
+      const stiff = now < gripUntil ? 1 : CFG.stiffness;
+      const iters = CFG.iterations | 0;
+      for (let it = 0; it < iters; it++) {
+        for (let i = 0; i < n - 1; i++) {
+          const wa = i === 0 ? 0 : 1, wb = (i + 1 === n - 1 && tipPinned) ? 0 : 1;
+          const ws = wa + wb;
+          if (!ws) continue;
+          const dx = X[i + 1] - X[i], dy = Y[i + 1] - Y[i];
+          const d = Math.sqrt(dx * dx + dy * dy) || 1e-6;
+          const diff = (d - L) / d * stiff / ws;
+          X[i] += dx * diff * wa; Y[i] += dy * diff * wa;
+          X[i + 1] -= dx * diff * wb; Y[i + 1] -= dy * diff * wb;
+        }
+      }
+    }
+    if (strands.some(s => s.dead)) {
+      for (let i = strands.length - 1; i >= 0; i--) if (strands[i].dead) strands.splice(i, 1);
+    }
+  }
+
+  // what shape the surface is trying to reach this frame
+  function buildSurfaceTarget(now, hovering) {
+    const t = now / 1000;
+    for (let k = 0; k < M; k++) {
+      const a = k / M * TAU;
+      dtgt[k] = reduced ? 0 : 0.7 * Math.sin(a * 3 + t * 0.8) + 0.5 * Math.sin(a * 7 - t * 1.1);
+    }
+    if (reduced) return;
+    if (MORPH.big > 0.01) {
+      // a slow, menacing heave
+      const b = clamp(MORPH.big, 0, 1) * G.r;
+      for (let k = 0; k < M; k++) { const a = k / M * TAU; dtgt[k] += b * (0.035 * Math.sin(a * 3 + t * 1.6) + 0.02 * Math.sin(a * 5 - t * 2.3)); }
+    }
+    if (MORPH.phase === 'ball') {
+      // the ball shivers just before it bursts
+      const u = (now - MORPH.t0) / CFG.ballMs;
+      if (u > 0.5) { const amp = (u - 0.5) / 0.5 * 4.5; for (let k = 0; k < M; k++) dtgt[k] += amp * Math.sin(k * 1.7 + now * 0.09); }
+    }
+    const reach = CFG.attachRadius * 1.25;
+    if (MORPH.phase === 'idle' && pointer.active && prox.d < reach && !hovering) {
+      const live = liveCount();
+      const A = CFG.mound * clamp(1 - prox.d / reach, 0, 1) ** 1.4 * (live ? 1 : 0.55);
+      addBump(dtgt, prox.s, A, Math.max(16, arcNow * 0.42));
+    }
+    for (const st of strands) {
+      if (st.hidden) continue;
+      const pull = st.state === 'retract' ? 1 - (now - st.t0) / CFG.retractMs : 1;
+      addBump(dtgt, st.s, (1.4 + 5 * clamp(st.stretch, 0, 1)) * pull * (0.5 + st.width * 0.25), 8);
+    }
+  }
+
+  /* ───────────────────────── render ───────────────────────── */
+  const BX = new Float32Array(M), BY = new Float32Array(M);
+  const LX = new Float32Array(64), LY = new Float32Array(64), RX = new Float32Array(64), RY = new Float32Array(64);
+  const GX = new Float32Array(64), GY = new Float32Array(64);
+
+  function traceBody(sx = 1, sy = 1, oy = 0) {
+    const cx = G.cx, cy = G.cy;
+    const px = i => cx + (BX[i] - cx) * sx, py = i => cy + (BY[i] - cy) * sy + oy;
+    ctx.beginPath();
+    ctx.moveTo((px(M - 1) + px(0)) / 2, (py(M - 1) + py(0)) / 2);
+    for (let k = 0; k < M; k++) {
+      const j = (k + 1) % M;
+      ctx.quadraticCurveTo(px(k), py(k), (px(k) + px(j)) / 2, (py(k) + py(j)) / 2);
+    }
+    ctx.closePath();
+  }
+
+  function roundRectPath(x, y, w, h, r) {
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, w, h, Math.max(0, r)); else ctx.rect(x, y, w, h);
+  }
+  function sheen(x, y, w, h) {
+    const g = ctx.createLinearGradient(0, y, 0, y + Math.min(h, 26));
+    g.addColorStop(0, 'rgba(255,255,255,0.30)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    return g;
+  }
+  // a coated page element: splats grow from where droplets hit until the piece is black
+  function drawCoat(E, now, shrink) {
+    const maxR = Math.hypot(E.w, E.h);
+    ctx.save();
+    roundRectPath(E.x - 1, E.y - 1, E.w + 2, E.h + 2, E.rad + 1);
+    ctx.clip();
+    ctx.beginPath();
+    for (const b of E.blobs) {
+      const t = clamp((now - b.t0) / CFG.coatMs, 0, 1);
+      const R = (b.r0 + (maxR - b.r0) * (1 - (1 - t) ** 3)) * shrink;
+      if (R < 0.5) continue;
+      const cx = E.x + b.x, cy = E.y + b.y;
+      for (let i = 0; i <= 22; i++) {
+        const a = i / 22 * TAU;
+        const rr = R * (1 + 0.07 * Math.sin(a * 5 + b.ph + now * 0.004) + 0.04 * Math.sin(a * 9 - now * 0.006));
+        const px = cx + Math.cos(a) * rr, py = cy + Math.sin(a) * rr;
+        i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+      }
+      ctx.closePath();
+    }
+    ctx.fillStyle = COLORS.strand;
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-atop';
+    ctx.fillStyle = sheen(E.x, E.y, E.w, E.h);
+    ctx.fillRect(E.x, E.y, E.w, E.h);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.restore();
+  }
+  function drawTendril(x0, y0, x1, y1, w0, w1, seed) {
+    const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy) || 1;
+    const nx = -dy / L, ny = dx / L;
+    const bend = Math.sin(performance.now() * 0.006 + seed) * L * 0.12;
+    const qx = x0 + dx * 0.5 + nx * bend, qy = y0 + dy * 0.5 + ny * bend;
+    const K = 14;
+    for (let i = 0; i <= K; i++) {
+      const u = i / K, iu = 1 - u;
+      const px = iu * iu * x0 + 2 * u * iu * qx + u * u * x1, py = iu * iu * y0 + 2 * u * iu * qy + u * u * y1;
+      const tx = 2 * iu * (qx - x0) + 2 * u * (x1 - qx), ty = 2 * iu * (qy - y0) + 2 * u * (y1 - qy);
+      const tl = Math.hypot(tx, ty) || 1;
+      const w = (w1 + (w0 - w1) * iu ** 1.4) * (1 - 0.35 * Math.sin(Math.PI * u));
+      LX[i] = px - ty / tl * w / 2; LY[i] = py + tx / tl * w / 2;
+      RX[i] = px + ty / tl * w / 2; RY[i] = py - tx / tl * w / 2;
+    }
+    ctx.beginPath();
+    ctx.moveTo(LX[0], LY[0]);
+    for (let i = 1; i <= K; i++) ctx.lineTo(LX[i], LY[i]);
+    for (let i = K; i >= 0; i--) ctx.lineTo(RX[i], RY[i]);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath(); ctx.arc(x0, y0, w0 * 0.75, 0, TAU); ctx.fill();
+  }
+  // tendrils lashing out, and page pieces dragged across its skin into the mouth (or thrown back out)
+  function drawSlab(E, now) {
+    ctx.fillStyle = COLORS.strand;
+    if (E.state === 'reach' || E.state === 'coat') {
+      const r = E.state === 'reach' ? easeOutBack(clamp((now - E.t0) / CFG.reachMs, 0, 1)) : 1;
+      surfAt(closest(E.px, E.py, tmpP).s, 3, tmp);
+      const F = G.r;
+      drawTendril(tmp.x, tmp.y, tmp.x + (E.px - tmp.x) * r, tmp.y + (E.py - tmp.y) * r, clamp(F * 0.14, 10, 30), clamp(F * 0.04, 4, 9), E.x * 0.01);
+      if (E.state === 'coat') { ctx.beginPath(); ctx.arc(E.px, E.py, clamp(F * 0.04, 4, 9), 0, TAU); ctx.fill(); }
+      return;
+    }
+    const ecx = E.x + E.w / 2, ecy = E.y + E.h / 2, mx = mouthX(), my = mouthY();
+    let p = 0, reach = 1;      // p: 0 = at home, 1 = in the mouth
+    if (E.state === 'pull') { const t = clamp((now - E.t0) / E.dur, 0, 1); p = t * t; }
+    else { const t = clamp((now - E.t0) / E.dur, 0, 1); p = 1 - easeOutBack(t); reach = t < 0.7 ? 1 : 1 - (t - 0.7) / 0.3; }
+    const s = 1 - 0.92 * p;
+    const cx = ecx + (mx - ecx) * p, cy = ecy + (my - ecy) * p;
+    const w = E.w * s, h = E.h * s;
+    if (reach > 0.01) {
+      surfAt(closest(cx, cy, tmpP).s, 2, tmp);
+      const tx = tmp.x + (cx - tmp.x) * reach, ty = tmp.y + (cy - tmp.y) * reach;
+      const m = Math.min(w, h);
+      drawTendril(tmp.x, tmp.y, tx, ty, clamp(m * 0.55, 8, 30), clamp(m * 0.35, 3, 18), E.x * 0.01);
+    }
+    roundRectPath(cx - w / 2, cy - h / 2, w, h, Math.min(E.rad * s + 2, w / 2, h / 2));
+    ctx.fill();
+    ctx.fillStyle = sheen(cx - w / 2, cy - h / 2, w, h);
+    ctx.fill();
+  }
+  // under the daemon: pieces being coated, and pieces draining clean after being thrown back
+  function drawEdibles(now) {
+    for (const E of EDIBLES) {
+      if (E.state === 'coat') drawCoat(E, now, 1);
+      else if (E.state === 'drain') drawCoat(E, now, (1 - clamp((now - E.t0) / 650, 0, 1)) ** 2);
+    }
+  }
+  function drawSlabs(now) {
+    for (const E of EDIBLES) if (E.state === 'reach' || E.state === 'coat' || E.state === 'pull' || E.state === 'spit') drawSlab(E, now);
+  }
+  function drawDaemonShadow() {
+    const k = clamp(MORPH.big, 0, 1);
+    if (k < 0.02) return;
+    const cx = G.cx, cy = G.cy + G.r * 1.18, rx = G.r * 0.95, ry = G.r * 0.12;
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rx);
+    g.addColorStop(0, `rgba(10,10,11,${(0.3 * k).toFixed(3)})`);
+    g.addColorStop(1, 'rgba(10,10,11,0)');
+    ctx.save();
+    ctx.translate(cx, cy); ctx.scale(1, ry / rx); ctx.translate(-cx, -cy);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(cx, cy, rx, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+  // ferrofluid crown of spikes, plus slow drips off its belly
+  function drawCrown(now) {
+    const k = clamp(MORPH.big, 0, 1) ** 1.5;
+    if (k < 0.02 || !crown.length) return;
+    const F = G.r, t = now / 1000;
+    ctx.fillStyle = COLORS.strand;
+    for (const c of crown) {
+      closest(G.cx + Math.cos(c.a) * 1e4, G.cy + Math.sin(c.a) * 1e4, tmpP);
+      surfAt(tmpP.s, 6, tmp);
+      const a = c.a + Math.sin(t * c.f + c.ph) * 0.14;
+      const L = c.len * F * k * (0.88 + 0.12 * Math.sin(t * c.f * 1.7 + c.ph));
+      const dx = Math.cos(a), dy = Math.sin(a), w = c.w * F * k;
+      const tipX = tmp.x + dx * (L + 6), tipY = tmp.y + dy * (L + 6);
+      const qx = tmp.x + dx * L * 0.55 - dy * L * 0.12, qy = tmp.y + dy * L * 0.55 + dx * L * 0.12;
+      ctx.beginPath();
+      ctx.moveTo(tmp.x - dy * w, tmp.y + dx * w);
+      ctx.quadraticCurveTo(qx - dy * w * 0.3, qy + dx * w * 0.3, tipX, tipY);
+      ctx.quadraticCurveTo(qx + dy * w * 0.3, qy - dx * w * 0.3, tmp.x + dy * w, tmp.y - dx * w);
+      ctx.closePath();
+      ctx.fill();
+    }
+    for (let i = 0; i < 3; i++) {
+      const a = Math.PI / 2 + (i - 1) * 0.42;
+      closest(G.cx + Math.cos(a) * 1e4, G.cy + Math.sin(a) * 1e4, tmpP);
+      surfAt(tmpP.s, 4, tmp);
+      const L = F * k * (0.1 + 0.07 * Math.sin(t * 0.9 + i * 2.1) + (i === 1 ? 0.06 : 0));
+      drawTendril(tmp.x, tmp.y, tmp.x, tmp.y + L, F * 0.07 * k, F * 0.025 * k, i);
+      ctx.beginPath(); ctx.arc(tmp.x, tmp.y + L, F * 0.035 * k, 0, TAU); ctx.fill();
+    }
+  }
+  function drawFace(now) {
+    const k = clamp((MORPH.big - 0.55) / 0.45, 0, 1);
+    if (k < 0.01) return;
+    const F = G.r, cx = G.cx, cy = G.cy;
+    if (now >= MORPH.blinkAt) { MORPH.blinkStart = now; MORPH.blinkAt = now + rand(2200, 4800); }
+    const bt = (now - MORPH.blinkStart) / 150;
+    const lid = bt < 1 ? 0.15 + 0.85 * Math.abs(1 - bt * 2) : 1;
+    const sated = MORPH.phase === 'sated' || MORPH.phase === 'return';
+    const look = (MORPH.phase === 'feast' || MORPH.phase === 'vomit') && MORPH.look
+      ? { x: MORPH.look.x + MORPH.look.w / 2, y: MORPH.look.y + MORPH.look.h / 2 }
+      : pointer.active ? pointer : { x: cx, y: cy + F };
+    ctx.save();
+    ctx.globalAlpha = k;
+    for (const side of [-1, 1]) {
+      const ex = cx + side * 0.33 * F, ey = cy - 0.14 * F;
+      const rot = -side * 0.32;
+      const open = (sated ? 0.45 : 1) * lid;
+      ctx.save();
+      // brow: slice the eye along a line that drops toward the nose, which is all it takes to look furious
+      ctx.beginPath();
+      ctx.moveTo(ex - side * 0.3 * F, ey - 0.15 * F);
+      ctx.lineTo(ex + side * 0.3 * F, ey - 0.03 * F);
+      ctx.lineTo(ex + side * 0.3 * F, ey + 0.3 * F);
+      ctx.lineTo(ex - side * 0.3 * F, ey + 0.3 * F);
+      ctx.closePath();
+      ctx.clip();
+      ctx.translate(ex, ey); ctx.rotate(rot);
+      ctx.shadowColor = COLORS.eyeGlow; ctx.shadowBlur = 0.14 * F;
+      ctx.fillStyle = COLORS.eye;
+      ctx.beginPath(); ctx.ellipse(0, 0, 0.19 * F, Math.max(0.5, 0.105 * F * open), 0, 0, TAU); ctx.fill(); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.clip();
+      // slit pupil tracks whatever it is eating, or you
+      let vx = look.x - ex, vy = look.y - ey;
+      const vl = Math.hypot(vx, vy) || 1;
+      const c = Math.cos(-rot), s = Math.sin(-rot);
+      const lx = (vx * c - vy * s) / vl, ly = (vx * s + vy * c) / vl;
+      const reachP = Math.min(vl * 0.05, 0.09 * F);
+      ctx.fillStyle = COLORS.pupil;
+      ctx.beginPath(); ctx.ellipse(lx * reachP, ly * reachP * 0.5, 0.02 * F, 0.07 * F, 0, 0, TAU); ctx.fill();
+      ctx.restore();
+    }
+    // mouth: a grin that tears open, rows of teeth top and bottom
+    const open = clamp(MORPH.mouth, 0, 1.2);
+    const mw = 0.5 * F, my = cy + 0.28 * F;
+    const L = { x: cx - mw, y: my - 0.1 * F }, R = { x: cx + mw, y: my - 0.1 * F };
+    const U = { x: cx, y: my + 0.08 * F }, B = { x: cx, y: my + 0.08 * F + (0.05 * F + 0.62 * F * open) };
+    const mouthPath = () => {
+      ctx.beginPath();
+      ctx.moveTo(L.x, L.y);
+      ctx.quadraticCurveTo(U.x, U.y, R.x, R.y);
+      ctx.quadraticCurveTo(B.x, B.y, L.x, L.y);
+      ctx.closePath();
+    };
+    const mg = ctx.createRadialGradient(cx, my + 0.2 * F, 0, cx, my + 0.2 * F, 0.55 * F);
+    mg.addColorStop(0, COLORS.throat);
+    mg.addColorStop(0.55, '#150404');
+    mg.addColorStop(1, '#000000');
+    mouthPath();
+    ctx.fillStyle = mg;
+    ctx.fill();
+    if (open > 0.06) {
+      ctx.save();
+      mouthPath(); ctx.clip();
+      ctx.fillStyle = COLORS.teeth;
+      const bez = (P, Q, u) => ({ x: (1 - u) ** 2 * P.x + 2 * u * (1 - u) * Q.x + u * u * R.x, y: (1 - u) ** 2 * P.y + 2 * u * (1 - u) * Q.y + u * u * R.y });
+      const tl = 0.11 * F * (0.45 + 0.55 * Math.min(open, 1)), tw = 0.042 * F;
+      for (let i = 0; i < 10; i++) {
+        const p = bez(L, U, 0.07 + i * 0.096);
+        ctx.beginPath(); ctx.moveTo(p.x - tw, p.y - 2); ctx.lineTo(p.x + tw, p.y - 2); ctx.lineTo(p.x, p.y + tl); ctx.closePath(); ctx.fill();
+      }
+      for (let i = 0; i < 9; i++) {
+        const p = bez(L, B, 0.12 + i * 0.095);
+        ctx.beginPath(); ctx.moveTo(p.x - tw * 0.9, p.y + 2); ctx.lineTo(p.x + tw * 0.9, p.y + 2); ctx.lineTo(p.x, p.y - tl * 0.8); ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    }
+    mouthPath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawBody(now) {
+    if (MORPH.scale < 0.02) return;
+    for (let k = 0; k < M; k++) {
+      pointAt(k / M * G.P, tmp);
+      BX[k] = tmp.x + tmp.nx * disp[k];
+      BY[k] = tmp.y + tmp.ny * disp[k];
+    }
+    const top = G.cy - G.r, h = G.h;
+    // lacquer body
+    const body = ctx.createLinearGradient(0, top - 10, 0, top + h + 10);
+    body.addColorStop(0, COLORS.bodyTop);
+    body.addColorStop(0.5, COLORS.bodyMid);
+    body.addColorStop(0.78, '#020203');
+    body.addColorStop(1, COLORS.bodyLow);
+    ctx.fillStyle = body;
+    traceBody();
+    ctx.fill();
+
+    ctx.save();
+    traceBody();
+    ctx.clip();
+    // bottom caustic, light bounced up through the liquid
+    const cg = ctx.createRadialGradient(G.cx, top + h * 1.05, 0, G.cx, top + h * 1.05, G.Ls * 0.5 + G.r);
+    cg.addColorStop(0, COLORS.caustic);
+    cg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = cg;
+    ctx.fillRect(G.cx - G.Ls / 2 - G.r, top + h * 0.5, G.Ls + G.r * 2, h);
+    // top specular band: a squashed copy of the live surface, so it bends over every bulge
+    const sg = ctx.createLinearGradient(0, top, 0, G.cy + 2);
+    sg.addColorStop(0, COLORS.specular);
+    sg.addColorStop(0.45, 'rgba(255,255,255,0.12)');
+    sg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = sg;
+    traceBody(0.9, 0.46, -h * 0.24);
+    ctx.fill();
+    // a hot reflection that slides with the cursor, like a window caught in wet paint
+    const target = pointer.active ? clamp((pointer.x - G.cx) * 0.12, -G.Ls * 0.4, G.Ls * 0.4) : 0;
+    reflX += (target - reflX) * 0.06;
+    const rgx = G.cx + reflX, rgy = top + h * 0.17;
+    const rg = ctx.createRadialGradient(rgx, rgy, 0, rgx, rgy, 34);
+    rg.addColorStop(0, 'rgba(255,255,255,0.55)');
+    rg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = rg;
+    ctx.save();
+    ctx.translate(rgx, rgy); ctx.scale(1, 0.16); ctx.translate(-rgx, -rgy);
+    ctx.beginPath(); ctx.arc(rgx, rgy, 34, 0, TAU); ctx.fill();
+    ctx.restore();
+    // rim light hugging the edge, brightest where the surface faces up
+    const rimG = ctx.createLinearGradient(0, top - 16, 0, top + h + 16);
+    rimG.addColorStop(0, COLORS.rim);
+    rimG.addColorStop(0.32, 'rgba(255,255,255,0.05)');
+    rimG.addColorStop(0.7, 'rgba(255,255,255,0)');
+    rimG.addColorStop(1, 'rgba(255,255,255,0.14)');
+    ctx.strokeStyle = rimG;
+    ctx.lineWidth = 2.4;
+    traceBody();
+    ctx.stroke();
+    ctx.restore();
+
+    // label rides the squeeze, and melts away while it's a ball
+    const la = clamp(1 - Math.abs(MORPH.m) * 1.8, 0, 1) * MORPH.scale;
+    if (la < 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = la;
+    ctx.translate(G.cx, G.cy + 1);
+    ctx.scale(bsx, bsy);
+    ctx.fillStyle = COLORS.label;
+    const fs = Math.round(base.h * 0.3);   // label scales with the pill
+    ctx.font = `700 ${fs}px Outfit, "Helvetica Neue", Helvetica, Arial, sans-serif`;
+    if ('letterSpacing' in ctx) ctx.letterSpacing = `${(-0.012 * fs).toFixed(2)}px`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText("let's collaborate", 0, 0);
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+    ctx.restore();
+  }
+
+  function drawStrand(st) {
+    const n = st.n, X = st.x, Y = st.y;
+    const s2 = clamp(st.stretch, 0, 1) ** 2;
+    const thin = 1 / (1 + s2 * 0.8);
+    const retracting = st.state === 'retract';
+    const w0 = st.width * 2.1 * thin, w1 = Math.max(0.5, st.width * 0.38) * thin;
+    for (let i = 0; i < n; i++) {
+      const a = Math.max(0, i - 1), b = Math.min(n - 1, i + 1);
+      const tx = X[b] - X[a], ty = Y[b] - Y[a];
+      const tl = Math.hypot(tx, ty) || 1;
+      let nx = -ty / tl, ny = tx / tl;
+      const u = i / (n - 1);
+      // body taper, a wide fillet where it leaves the pool, and a neck that pinches as it stretches
+      let w = w1 + (w0 - w1) * (1 - u) ** 1.6;
+      w += st.width * 2.6 * Math.max(0, 1 - u * 5) ** 2;
+      w *= 1 - Math.min(0.7, CFG.necking * 0.5 * s2 * Math.sin(Math.PI * u));
+      LX[i] = X[i] + nx * w / 2; LY[i] = Y[i] + ny * w / 2;
+      RX[i] = X[i] - nx * w / 2; RY[i] = Y[i] - ny * w / 2;
+      if (ny > 0) { nx = -nx; ny = -ny; }           // glint on the lit (upper) side
+      GX[i] = X[i] + nx * w * 0.24; GY[i] = Y[i] + ny * w * 0.24;
+    }
+    ctx.globalAlpha = st.alpha;
+    ctx.beginPath();
+    ctx.moveTo(LX[0], LY[0]);
+    for (let i = 1; i < n - 1; i++) ctx.quadraticCurveTo(LX[i], LY[i], (LX[i] + LX[i + 1]) / 2, (LY[i] + LY[i + 1]) / 2);
+    ctx.lineTo(LX[n - 1], LY[n - 1]);
+    ctx.lineTo(RX[n - 1], RY[n - 1]);
+    for (let i = n - 2; i > 0; i--) ctx.quadraticCurveTo(RX[i], RY[i], (RX[i] + RX[i - 1]) / 2, (RY[i] + RY[i - 1]) / 2);
+    ctx.lineTo(RX[0], RY[0]);
+    ctx.closePath();
+    ctx.fill();
+    // meniscus where it leaves the pool, bead at the tip once it lets go
+    ctx.globalAlpha = 1;
+    ctx.beginPath();
+    ctx.arc(X[0], Y[0], st.width * 1.6 + 1.2, 0, TAU);
+    ctx.fill();
+    if (retracting) {
+      ctx.beginPath();
+      ctx.arc(X[n - 1], Y[n - 1], Math.max(1.2, st.width * 1.05), 0, TAU);
+      ctx.fill();
+    }
+  }
+
+  function drawGlint(st) {
+    if (st.width < 1.4) return;
+    const n = st.n;
+    const m = Math.max(3, Math.round(n * 0.7));
+    ctx.globalAlpha = st.alpha;
+    ctx.beginPath();
+    ctx.moveTo(GX[1], GY[1]);
+    for (let i = 2; i < m; i++) ctx.quadraticCurveTo(GX[i - 1], GY[i - 1], (GX[i - 1] + GX[i]) / 2, (GY[i - 1] + GY[i]) / 2);
+    ctx.stroke();
+  }
+
+  function drawSpike(sp, now) {
+    const t = (now - sp.t0) / sp.life;
+    if (t < 0) return true;
+    if (t >= 1) return false;
+    const L = sp.mode === 'settle'
+      ? sp.len * (1 - t) ** 2.2 * (1 + 0.22 * Math.sin(t * 18 + sp.phase))
+      : sp.len * Math.sin(Math.PI * t) * (1 + 0.12 * Math.sin(t * 22 + sp.phase));
+    if (L < 0.4) return true;
+    surfAt(sp.s, 0, tmp);
+    const c = Math.cos(sp.tilt), s = Math.sin(sp.tilt);
+    const dx = tmp.nx * c - tmp.ny * s, dy = tmp.nx * s + tmp.ny * c;
+    const bx = tmp.x - tmp.nx * 3, by = tmp.y - tmp.ny * 3;
+    const tipX = tmp.x + dx * L, tipY = tmp.y + dy * L;
+    const w = sp.w * (sp.mode === 'settle' ? 1 - t * 0.4 : 0.8);
+    const cxp = tmp.x + dx * L * 0.5 - dy * L * 0.16 * sp.curl, cyp = tmp.y + dy * L * 0.5 + dx * L * 0.16 * sp.curl;
+    ctx.beginPath();
+    ctx.moveTo(bx - dy * w * 1.8, by + dx * w * 1.8);
+    ctx.quadraticCurveTo(cxp - dy * w * 0.5, cyp + dx * w * 0.5, tipX, tipY);
+    ctx.quadraticCurveTo(cxp + dy * w * 0.5, cyp - dx * w * 0.5, bx + dy * w * 1.8, by - dx * w * 1.8);
+    ctx.closePath();
+    ctx.fill();
+    return true;
+  }
+
+  function drawOverlay() {
+    ctx.strokeStyle = COLORS.overlay;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 5]);
+    ctx.beginPath();
+    for (let s = 0; s <= G.P; s += 6) {
+      pointAt(s, tmp);
+      const x = tmp.x + tmp.nx * CFG.attachRadius, y = tmp.y + tmp.ny * CFG.attachRadius;
+      s ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.setLineDash([]);
+    if (pointer.active) {
+      pointAt(prox.s, tmp);
+      ctx.fillStyle = '#e0301e';
+      ctx.beginPath(); ctx.arc(tmp.x, tmp.y, 3, 0, TAU); ctx.fill();
+      ctx.strokeStyle = 'rgba(224,48,30,0.5)';
+      ctx.beginPath(); ctx.moveTo(tmp.x, tmp.y); ctx.lineTo(pointer.x, pointer.y); ctx.stroke();
+    }
+  }
+
+  /* ───────────────────────── main loop ───────────────────────── */
+  let last = performance.now(), acc = 0, fpsT = 0, fpsN = 0;
+  const fpsEl = document.getElementById('fps');
+  const overlayBox = document.getElementById('dbgOverlay');
+
+  function frame(now) {
+    const dtMs = Math.min(now - last, 50);
+    last = now;
+    const dt = dtMs / 1000;
+
+    // pool spring: breathing on hover, squeeze on click
+    updateMorph(now, dt);
+    updateEdibles(now);
+    updateGeom();
+    closest(pointer.x, pointer.y);
+    const morphing = MORPH.phase !== 'idle';
+    const hovering = !morphing && pointer.active && prox.d < 0;
+    const target = hovering ? (reduced ? 1.02 : 1.028 + 0.01 * Math.sin(now / 1000 * 2.2)) : 1;
+    scV += ((target - sc) * 300 - scV * 17) * dt;
+    sc += scV * dt;
+    const sq = Math.max(0, target - sc);
+    bsx = sc + sq * 0.45; bsy = sc - sq * 0.6;
+
+    buildSurfaceTarget(now, hovering);
+    if (reduced) {
+      const g = pointer.active ? clamp(1 - prox.d / CFG.attachRadius, 0, 1) : 0;
+      glow += (g - glow) * Math.min(1, dt * 8);
+      wrap.style.setProperty('--glow', glow.toFixed(3));
+    } else {
+      arcNow += ((hovering ? CFG.hoverArc : CFG.rootArc) - arcNow) * Math.min(1, dt * 5);
+      const inRange = !morphing && pointer.active && prox.d < CFG.attachRadius;
+      const live = liveCount();
+      if (inRange && now >= cooldownUntil && live < Math.max(1, bundleTarget * 0.5)) {
+        if (live === 0) bundleTarget = randInt(Math.min(CFG.strandsMin, CFG.strandsMax), Math.max(CFG.strandsMin, CFG.strandsMax));
+        spawn(Math.max(1, bundleTarget - live), now);
+        cooldownUntil = now + 260;
+      }
+      // idle: a couple of hairs twitch on the edge
+      if (!morphing && !strands.length && (!pointer.active || prox.d > CFG.attachRadius * 1.25) && now >= nextTwitch) {
+        if (nextTwitch) {
+          const s0 = rand(0, G.P), k = randInt(1, 3);
+          for (let i = 0; i < k; i++) spikes.push({ s: s0 + rand(-7, 7), len: rand(6, 14), w: rand(1.2, 2.2), t0: now + i * rand(40, 140), life: rand(700, 1200), tilt: rand(-0.3, 0.3), curl: rand(-1, 1), phase: rand(0, TAU), mode: 'twitch' });
+          addBump(dvel, s0, 0.25, 10);
+        }
+        nextTwitch = now + rand(CFG.idleMin, Math.max(CFG.idleMin, CFG.idleMax));
+      }
+    }
+    acc += dt;
+    let steps = 0;
+    while (acc >= H && steps < 6) {
+      if (reduced) stepSurface(); else step(now - (acc - H) * 1000);
+      acc -= H; steps++;
+    }
+    if (steps === 6) acc = 0;
+
+    const g = strands.some(s => s.state !== 'retract' && !s.hidden);
+    if (g !== grabbing) {
+      grabbing = g;
+      cursorImg.src = g ? SPRITE_GRAB : SPRITE_POINT;
+      cursorEl.classList.toggle('grab', g);
+    }
+
+    // draw: pool, residue, strands, then their wet glints on top
+    const shx = MORPH.shake > 0.15 ? rand(-1, 1) * MORPH.shake : 0, shy = MORPH.shake > 0.15 ? rand(-1, 1) * MORPH.shake : 0;
+    siteEl.style.transform = shx || shy ? `translate(${shx.toFixed(1)}px, ${shy.toFixed(1)}px)` : '';
+    ctx.setTransform(dpr, 0, 0, dpr, shx * dpr, shy * dpr);
+    ctx.clearRect(-20, -20, vw + 40, vh + 40);
+    drawEdibles(now);
+    drawDaemonShadow();
+    drawBody(now);
+    drawCrown(now);
+    drawSlabs(now);
+    drawFace(now);
+    ctx.fillStyle = COLORS.strand;
+    for (let i = spikes.length - 1; i >= 0; i--) if (!drawSpike(spikes[i], now)) spikes.splice(i, 1);
+    ctx.strokeStyle = COLORS.glint;
+    ctx.lineWidth = 0.7;
+    ctx.lineCap = 'round';
+    for (const st of strands) {
+      if (st.hidden) continue;
+      drawStrand(st);
+      drawGlint(st);
+    }
+    ctx.globalAlpha = 1;
+    if (!dbg.hidden && overlayBox.checked) drawOverlay();
+
+    if (!dbg.hidden) {
+      fpsN++; fpsT += dtMs;
+      if (fpsT > 500) { fpsEl.textContent = `${Math.round(fpsN * 1000 / fpsT)} fps · ${strands.length} strands`; fpsT = 0; fpsN = 0; }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ───────────────────────── debug panel (press D) ───────────────────────── */
+  const KNOBS = [
+    ['attachRadius', 40, 420, 1], ['strandsMin', 1, 80, 1], ['strandsMax', 1, 80, 1], ['ropePoints', 4, 24, 1],
+    ['stiffness', 0.1, 1, 0.01], ['iterations', 1, 12, 1], ['damping', 0.7, 1, 0.001], ['slack', 0, 0.6, 0.01],
+    ['rootArc', 0, 400, 1], ['hoverArc', 0, 200, 1], ['breakMin', 1, 3, 0.01], ['breakMax', 1, 4, 0.01],
+    ['widthMin', 0.2, 5, 0.05], ['widthMax', 0.4, 7, 0.05], ['necking', 0, 2, 0.01], ['wobble', 0, 4000, 10], ['bend', 0, 3000, 10],
+    ['emergeMin', 40, 1000, 5], ['emergeMax', 40, 1000, 5], ['stagger', 0, 40, 1], ['retractMs', 80, 1400, 10],
+    ['cooldownMs', 0, 2000, 10], ['spikesMin', 0, 16, 1], ['spikesMax', 0, 16, 1],
+    ['mound', 0, 40, 0.5], ['surfSpring', 0.001, 0.05, 0.001], ['surfVisc', 0.6, 0.99, 0.005], ['surfSpread', 0, 0.24, 0.005],
+    ['ballMs', 150, 1200, 10],
+    ['daemonSize', 0.1, 0.4, 0.005], ['reachMs', 60, 1000, 10], ['coatMs', 60, 1500, 10], ['eatStagger', 0, 600, 5], ['pullMs', 150, 1500, 10], ['spitStagger', 0, 300, 5],
+  ];
+  const knobsEl = document.getElementById('knobs');
+  const fmt = (v, step) => step >= 1 ? String(Math.round(v)) : (+v).toFixed(step < 0.01 ? 3 : 2);
+  const inputs = {};
+  for (const [key, min, max, stepV] of KNOBS) {
+    const id = 'k-' + key;
+    const lab = document.createElement('label'); lab.htmlFor = id; lab.textContent = key;
+    const inp = document.createElement('input');
+    Object.assign(inp, { type: 'range', id, min, max, step: stepV, value: CFG[key] });
+    const out = document.createElement('output'); out.htmlFor = id; out.textContent = fmt(CFG[key], stepV);
+    inp.addEventListener('input', () => { CFG[key] = +inp.value; out.textContent = fmt(CFG[key], stepV); });
+    knobsEl.append(lab, inp, out);
+    inputs[key] = [inp, out, stepV];
+  }
+  document.getElementById('dbgReset').addEventListener('click', () => {
+    Object.assign(CFG, DEFAULTS);
+    for (const k in inputs) { const [inp, out, sv] = inputs[k]; inp.value = CFG[k]; out.textContent = fmt(CFG[k], sv); }
+  });
+  addEventListener('keydown', e => {
+    if (e.target instanceof HTMLInputElement && e.target.type !== 'range' && e.target.type !== 'checkbox') return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const k = e.key.toLowerCase();
+    if (k === 'd') dbg.hidden = !dbg.hidden;
+    else if (k === 'm') toggleSound();
+    else if (k === 'r') {
+      // clean frame for screen recording: no hints, no panel
+      const on = document.documentElement.classList.toggle('rec');
+      dbg.hidden = true;
+      measureEdibles();
+      measure();
+      toast(on ? 'clean frame on · R to exit' : 'clean frame off');
+    }
+  });
+
+  resize();
+  updateGeom();
+  requestAnimationFrame(frame);
+})();
+</script>
